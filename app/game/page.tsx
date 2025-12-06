@@ -42,8 +42,13 @@ function Player({
 
             if (action) {
                 // Fix: Remove position tracks to prevent root motion (snapping back)
+                // Use a more robust regex to catch all position-related tracks
                 const clip = action.getClip();
-                clip.tracks = clip.tracks.filter(track => !track.name.includes('.position'));
+                clip.tracks = clip.tracks.filter(track => !track.name.match(/position/i));
+
+                // Ensure the action loops
+                action.setLoop(THREE.LoopRepeat, Infinity);
+                action.clampWhenFinished = false;
 
                 action.reset().fadeIn(0.5).play();
             }

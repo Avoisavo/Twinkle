@@ -2,10 +2,20 @@
 
 import { useState, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { Loader } from '@react-three/drei';
+import { Loader, useVideoTexture } from '@react-three/drei';
 import { BookScene } from './components/BookScene';
 import { BookPageLayout } from './components/BookPageLayout';
 import LearnWordNavbar from './components/LearnWordNavbar';
+
+function VideoComponent() {
+    const texture = useVideoTexture('/hellokitty/real.mp4');
+    return (
+        <mesh rotation={[0, 0, 0]} scale={[0.9, 0.9, 1]}>
+            <planeGeometry args={[5, 7]} />
+            <meshBasicMaterial map={texture} toneMapped={false} />
+        </mesh>
+    );
+}
 
 export default function DyslexiaPage() {
     const [flippedIndex, setFlippedIndex] = useState(0);
@@ -29,7 +39,7 @@ export default function DyslexiaPage() {
         {
             left: (
                 <group position={[0, 0, 0]}>
-                    {/* Empty left page */}
+                    <VideoComponent />
                 </group>
             ),
             right: (
@@ -65,9 +75,9 @@ export default function DyslexiaPage() {
         }}>
             {/* Navbar */}
             <LearnWordNavbar />
-            
+
             {/* 3D Book */}
-            <div 
+            <div
                 className="fixed inset-0 z-0 cursor-pointer"
                 onClick={() => {
                     // Increment flippedIndex when clicked, but don't exceed the number of pages
