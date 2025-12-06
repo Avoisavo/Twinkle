@@ -1,4 +1,4 @@
-# CursorHack - CureMyBaby
+# CursorHack - Twinkle
 
 ## Background of the Story
 The last time I worked, I was a part-time teacher at a primary school where I had the chance to teach students with ADHD. I realized something strange: these kids are actually very curious about their surroundings and the material I taught. Yet, they still suffered from poor school performance, were bullied by friends, and often ate lunch alone.
@@ -16,7 +16,7 @@ The current educational landscape fails to accommodate the unique needs of ADHD 
 ## Solution
 We realized that to help these kids, we need to give them what they actually need: **interesting learning materials**, a **clean environment** to minimize distraction, and **multi-sensory** engagement.
 
-**CursorHack - CureMyBaby** is our answer. We have gamified the learning experience specifically for ADHD kids (and any kid who struggles with traditional methods).
+**Twinkle** is our answer. We have gamified the learning experience specifically for ADHD kids (and any kid who struggles with traditional methods).
 
 -   **Gamified Platform**: Unlike standard apps, we turn learning into an immersive game to capture and hold attention.
 -   **Tailored Environment**: Designed to be engaging without being overwhelming, providing the right balance of stimulation.
