@@ -6,6 +6,7 @@ import { useFBX, useAnimations, Text, Environment, OrbitControls, Cloud, useText
 
 import * as THREE from 'three';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 // --- Constants ---
 const LANE_WIDTH = 2; // Width of each lane
@@ -304,6 +305,16 @@ function Sparkles() {
 
 function GameOverScreen({ result, onRestart }: { result: 'correct' | 'wrong', onRestart: () => void }) {
     const isWin = result === 'correct';
+    const router = useRouter();
+
+    useEffect(() => {
+        if (isWin) {
+            const timer = setTimeout(() => {
+                router.push('/room');
+            }, 2000);
+            return () => clearTimeout(timer);
+        }
+    }, [isWin, router]);
 
     if (isWin) {
         return (
