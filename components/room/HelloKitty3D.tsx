@@ -97,11 +97,11 @@ export default function HelloKitty3D({ onHelloComplete }: HelloKitty3DProps = {}
             };
         } else {
             targetState.current = {
-                scale: 0.01,
-                x: -viewport.width / 2 + 1.5,
-                y: -viewport.height / 2 + 1,
+                scale: 0.015, // Keep same scale as center
+                x: -2.0, // More to the left
+                y: -1.8, // Keep same Y position
                 z: 0,
-                rotateY: 0.5,
+                rotateY: 0.2, // Slight turn to the right
             };
         }
     }, [currentVariant, viewport.width, viewport.height]);

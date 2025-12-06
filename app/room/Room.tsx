@@ -548,7 +548,7 @@ export default function Room() {
 
                     {/* Bookshelf Model */}
                     {showBookshelf && (
-                        <group position={[2, 1, -2]} scale={0.5} rotation={[0, -0.3, 0]}>
+                        <group position={[1.5, 0.2, -2]} scale={0.8} rotation={[0, -0.3, 0]}>
                             <Float speed={1} rotationIntensity={0.2} floatIntensity={0.2}>
                                 <BookshelfModel />
                             </Float>
