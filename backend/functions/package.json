@@ -11,10 +11,10 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.33.1",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
-    "@anthropic-ai/sdk": "^0.33.1",
     "ts-node": "^10.9.2"
   },
   "devDependencies": {
