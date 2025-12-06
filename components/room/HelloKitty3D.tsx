@@ -8,14 +8,11 @@ interface HelloKitty3DProps {
     onLoad?: () => void;
 }
 
-import { Selection, Select, EffectComposer, Outline } from "@react-three/postprocessing";
-
-export default function HelloKitty3D({ onHelloComplete, onLoad, onClick }: HelloKitty3DProps & { onClick?: () => void }) {
+export default function HelloKitty3D({ onHelloComplete, onLoad }: HelloKitty3DProps = {}) {
     const group = useRef<any>(null);
     const waveFbx = useFBX("/hellokitty/helloModel/chatboxwave.fbx");
     const idleFbx = useFBX("/hellokitty/helloModel/dwarf Idle.fbx");
     const { viewport } = useThree();
-    const [hovered, setHovered] = useState(false);
 
     // Trigger onLoad when component mounts (meaning FBX is loaded)
     useEffect(() => {
@@ -56,6 +53,10 @@ export default function HelloKitty3D({ onHelloComplete, onLoad, onClick }: Hello
         rotateY: 0,
     });
 
+    const [message, setMessage] = useState("Hello my friend !");
+    const [showBubble, setShowBubble] = useState(true);
+    const [bubblePosition, setBubblePosition] = useState<[number, number, number]>([0, 180, 0]);
+
     useEffect(() => {
         if (!actions || !actions["Wave"] || !actions["Idle"]) {
             console.warn("HelloKitty3D: Missing required actions (Wave or Idle)");
@@ -81,6 +82,10 @@ export default function HelloKitty3D({ onHelloComplete, onLoad, onClick }: Hello
 
                 // Trigger move to corner
                 setCurrentVariant("corner");
+
+                // Update message and position
+                setMessage("Please choose your material from the shelf");
+                setBubblePosition([0, 180, 0]); // Adjusted position (higher than 150)
 
                 // Call the completion callback if provided
                 if (onHelloComplete) {
@@ -118,35 +123,39 @@ export default function HelloKitty3D({ onHelloComplete, onLoad, onClick }: Hello
     }, [currentVariant, viewport.width, viewport.height]);
 
     // Animate towards target state
-    useFrame(() => {
+    useFrame((state, delta) => {
         if (!group.current) return;
 
-        const lerpSpeed = 0.05; // Adjust for animation speed
+        // Use a damping factor that is frame-rate independent
+        // damp formula: lerp(current, target, 1 - exp(-lambda * dt))
+        // lambda = 2 gives a nice smooth transition over ~1-2 seconds
+        const lambda = 1.5;
+        const alpha = 1 - Math.exp(-lambda * delta);
 
         currentState.current.scale = THREE.MathUtils.lerp(
             currentState.current.scale,
             targetState.current.scale,
-            lerpSpeed
+            alpha
         );
         currentState.current.x = THREE.MathUtils.lerp(
             currentState.current.x,
             targetState.current.x,
-            lerpSpeed
+            alpha
         );
         currentState.current.y = THREE.MathUtils.lerp(
             currentState.current.y,
             targetState.current.y,
-            lerpSpeed
+            alpha
         );
         currentState.current.z = THREE.MathUtils.lerp(
             currentState.current.z,
             targetState.current.z,
-            lerpSpeed
+            alpha
         );
         currentState.current.rotateY = THREE.MathUtils.lerp(
             currentState.current.rotateY,
             targetState.current.rotateY,
-            lerpSpeed
+            alpha
         );
 
         group.current.scale.setScalar(currentState.current.scale);
@@ -158,81 +167,48 @@ export default function HelloKitty3D({ onHelloComplete, onLoad, onClick }: Hello
         group.current.rotation.y = currentState.current.rotateY;
     });
 
-    useEffect(() => {
-        document.body.style.cursor = hovered ? 'pointer' : 'auto';
-        return () => { document.body.style.cursor = 'auto'; };
-    }, [hovered]);
-
     return (
-        <Selection>
-            <EffectComposer autoClear={false} enabled={hovered}>
-                <Outline visibleEdgeColor={0xFFFF00} hiddenEdgeColor={0xFFFF00} blur edgeStrength={10} width={1000} />
-            </EffectComposer>
-            <Select enabled={hovered}>
-                <group
-                    ref={group}
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        onClick?.();
-                    }}
-                    onPointerOver={(e) => {
-                        e.stopPropagation();
-                        setHovered(true);
-                    }}
-                    onPointerOut={(e) => {
-                        e.stopPropagation();
-                        setHovered(false);
-                    }}
-                >
-                    <primitive object={waveFbx} />
+        <group ref={group}>
+            <primitive object={waveFbx} />
+            {/* Add a light specifically for the model if needed */}
+            <ambientLight intensity={0.5} />
+            <directionalLight position={[5, 5, 5]} intensity={1.5} />
 
-                    {/* Backlight Effect */}
-                    <pointLight
-                        position={[0, 2, -2]}
-                        intensity={hovered ? 5 : 0}
-                        color="yellow"
-                        distance={10}
-                        decay={2}
-                    />
-
-                    {/* Add a light specifically for the model if needed */}
-                    <ambientLight intensity={0.5} />
-                    <directionalLight position={[5, 5, 5]} intensity={1.5} />
-
-                    {/* Chat Bubble - Only visible in center */}
-                    {currentVariant === "center" && (
-                        <Html position={[0, 180, 0]} center>
-                            <div style={{
-                                background: 'white',
-                                padding: '16px 24px', // Increased padding
-                                borderRadius: '20px', // Increased radius
-                                borderBottomLeftRadius: '0',
-                                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                                fontFamily: 'sans-serif',
-                                fontSize: '24px', // Increased font size
-                                fontWeight: 'bold',
-                                color: '#333',
-                                whiteSpace: 'nowrap',
-                                position: 'relative',
-                                marginBottom: '20px'
-                            }}>
-                                Hello my friend !
-                                <div style={{
-                                    position: 'absolute',
-                                    left: '0',
-                                    bottom: '-10px',
-                                    width: '0',
-                                    height: '0',
-                                    borderLeft: '10px solid white',
-                                    borderBottom: '10px solid transparent',
-                                    borderTop: '0'
-                                }} />
-                            </div>
-                        </Html>
-                    )}
-                </group>
-            </Select>
-        </Selection>
+            {/* Chat Bubble */}
+            {showBubble && (
+                <Html position={bubblePosition} center>
+                    <div style={{
+                        background: 'white',
+                        padding: '12px 20px', // Reduced padding
+                        borderRadius: '20px',
+                        borderBottomLeftRadius: '0',
+                        boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                        fontFamily: 'sans-serif',
+                        fontSize: '18px', // Reduced font size
+                        fontWeight: 'bold',
+                        color: '#333',
+                        whiteSpace: 'nowrap',
+                        position: 'relative',
+                        marginBottom: '20px',
+                        transition: 'all 0.5s ease-in-out', // Smooth transition for any style changes
+                        opacity: 1,
+                        transform: 'scale(1)',
+                    }}>
+                        {message}
+                        <div style={{
+                            position: 'absolute',
+                            left: '0',
+                            bottom: '-10px',
+                            width: '0',
+                            height: '0',
+                            borderLeft: '10px solid white',
+                            borderBottom: '10px solid transparent',
+                            borderTop: '0'
+                        }} />
+                    </div>
+                </Html>
+            )}
+        </group>
     );
 }
 

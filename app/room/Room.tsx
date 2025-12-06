@@ -7,20 +7,21 @@ import HelloKitty3D from "../../components/room/HelloKitty3D";
 import { BookshelfModel, BookshelfEnvironment } from "../../components/BookshelfScene";
 
 // Animated wrapper for the bookshelf
-const BookshelfAnimatedGroup = () => {
+const BookshelfAnimatedGroup = ({ visible }: { visible: boolean }) => {
     const group = useRef<THREE.Group>(null);
     const targetScale = 0.8;
 
     useFrame((state: RootState, delta: number) => {
         if (group.current) {
-            // Smoothly interpolate scale from 0 to targetScale
-            // Using a simple lerp for smooth ease-out effect
-            // alpha of ~0.1 at 60fps is good. Using delta to be frame-rate independent-ish.
+            // Determine target scale based on visibility
+            const currentTarget = visible ? targetScale : 0;
+
+            // Smoothly interpolate scale
             // damp formula: lerp(current, target, 1 - exp(-lambda * dt))
             const lambda = 4; // speed factor
             const alpha = 1 - Math.exp(-lambda * delta);
 
-            group.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), alpha);
+            group.current.scale.lerp(new THREE.Vector3(currentTarget, currentTarget, currentTarget), alpha);
         }
     });
 
@@ -301,8 +302,8 @@ export default function Room() {
                         onClick={() => router.push('/talkingsana')}
                     />
 
-                    {/* Bookshelf Model */}
-                    {showBookshelf && <BookshelfAnimatedGroup />}
+                    {/* Bookshelf Model - Always rendered, visibility controlled by prop */}
+                    <BookshelfAnimatedGroup visible={showBookshelf} />
                 </Canvas>
             </div>
         </div>
