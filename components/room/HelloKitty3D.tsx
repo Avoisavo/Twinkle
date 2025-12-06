@@ -4,6 +4,8 @@ import { useThree, useFrame } from "@react-three/fiber";
 import { motion } from "framer-motion-3d";
 import * as THREE from "three";
 
+const MotionGroup = motion.group as any;
+
 export default function HelloKitty3D() {
     const group = useRef<any>(null);
     const waveFbx = useFBX("/hellokitty/helloModel/chatboxwave.fbx");
@@ -11,18 +13,25 @@ export default function HelloKitty3D() {
     const { viewport } = useThree();
 
     // Prepare animations
-    if (waveFbx.animations.length > 0) waveFbx.animations[0].name = "Wave";
-    if (idleFbx.animations.length > 0) idleFbx.animations[0].name = "Idle";
+    const animations: THREE.AnimationClip[] = [];
+    if (waveFbx.animations && waveFbx.animations.length > 0) {
+        waveFbx.animations[0].name = "Wave";
+        animations.push(waveFbx.animations[0]);
+    }
+    if (idleFbx.animations && idleFbx.animations.length > 0) {
+        idleFbx.animations[0].name = "Idle";
+        animations.push(idleFbx.animations[0]);
+    }
 
-    const { actions, mixer } = useAnimations(
-        [waveFbx.animations[0], idleFbx.animations[0]],
-        group
-    );
+    const { actions, mixer } = useAnimations(animations, group);
 
     const [currentVariant, setCurrentVariant] = useState("center");
 
     useEffect(() => {
-        if (!actions || !actions["Wave"] || !actions["Idle"]) return;
+        if (!actions || !actions["Wave"] || !actions["Idle"]) {
+            console.warn("HelloKitty3D: Missing required actions (Wave or Idle)");
+            return;
+        }
 
         const waveAction = actions["Wave"];
         const idleAction = actions["Idle"];
@@ -74,7 +83,7 @@ export default function HelloKitty3D() {
     };
 
     return (
-        <motion.group
+        <MotionGroup
             ref={group}
             animate={currentVariant}
             variants={variants}
@@ -116,7 +125,7 @@ export default function HelloKitty3D() {
                     </div>
                 </Html>
             )}
-        </motion.group>
+        </MotionGroup>
     );
 }
 
