@@ -5,13 +5,21 @@ import * as THREE from "three";
 
 interface HelloKitty3DProps {
     onHelloComplete?: () => void;
+    onLoad?: () => void;
 }
 
-export default function HelloKitty3D({ onHelloComplete }: HelloKitty3DProps = {}) {
+export default function HelloKitty3D({ onHelloComplete, onLoad }: HelloKitty3DProps = {}) {
     const group = useRef<any>(null);
     const waveFbx = useFBX("/hellokitty/helloModel/chatboxwave.fbx");
     const idleFbx = useFBX("/hellokitty/helloModel/dwarf Idle.fbx");
     const { viewport } = useThree();
+
+    // Trigger onLoad when component mounts (meaning FBX is loaded)
+    useEffect(() => {
+        if (onLoad) {
+            onLoad();
+        }
+    }, [onLoad]);
 
     // Prepare animations
     const animations: THREE.AnimationClip[] = [];
@@ -27,7 +35,7 @@ export default function HelloKitty3D({ onHelloComplete }: HelloKitty3DProps = {}
     const { actions, mixer } = useAnimations(animations, group);
 
     const [currentVariant, setCurrentVariant] = useState<"center" | "corner">("center");
-    
+
     // Animation state
     const targetState = useRef({
         scale: 0.015,
@@ -36,7 +44,7 @@ export default function HelloKitty3D({ onHelloComplete }: HelloKitty3DProps = {}
         z: 0,
         rotateY: 0,
     });
-    
+
     const currentState = useRef({
         scale: 0.015,
         x: 0,
@@ -70,7 +78,7 @@ export default function HelloKitty3D({ onHelloComplete }: HelloKitty3DProps = {}
 
                 // Trigger move to corner
                 setCurrentVariant("corner");
-                
+
                 // Call the completion callback if provided
                 if (onHelloComplete) {
                     onHelloComplete();
@@ -109,9 +117,9 @@ export default function HelloKitty3D({ onHelloComplete }: HelloKitty3DProps = {}
     // Animate towards target state
     useFrame(() => {
         if (!group.current) return;
-        
+
         const lerpSpeed = 0.05; // Adjust for animation speed
-        
+
         currentState.current.scale = THREE.MathUtils.lerp(
             currentState.current.scale,
             targetState.current.scale,
@@ -137,7 +145,7 @@ export default function HelloKitty3D({ onHelloComplete }: HelloKitty3DProps = {}
             targetState.current.rotateY,
             lerpSpeed
         );
-        
+
         group.current.scale.setScalar(currentState.current.scale);
         group.current.position.set(
             currentState.current.x,

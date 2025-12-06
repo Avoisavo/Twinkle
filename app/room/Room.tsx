@@ -520,15 +520,19 @@ export default function Room() {
     }, []);
 
     const [showBookshelf, setShowBookshelf] = useState(false);
-    
-    // Show bookshelf 2 seconds after HelloKitty appears
+    const [isHelloKittyLoaded, setIsHelloKittyLoaded] = useState(false);
+
+    // Show bookshelf 2 seconds after HelloKitty appears (loads)
     useEffect(() => {
+        if (!isHelloKittyLoaded) return;
+
+        const delaySeconds = 2;
         const timer = setTimeout(() => {
             setShowBookshelf(true);
-        }, 2000);
-        
+        }, delaySeconds * 1000);
+
         return () => clearTimeout(timer);
-    }, []);
+    }, [isHelloKittyLoaded]);
 
     return (
         <div className="relative w-full h-full">
@@ -549,7 +553,7 @@ export default function Room() {
                     */}
                     <ambientLight intensity={0.4} />
 
-                    <HelloKitty3D />
+                    <HelloKitty3D onLoad={() => setIsHelloKittyLoaded(true)} />
 
                     {/* Bookshelf Model */}
                     {showBookshelf && (
