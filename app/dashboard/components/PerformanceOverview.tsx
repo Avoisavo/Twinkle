@@ -5,7 +5,7 @@ import starImg from './star.png';
 
 const PerformanceRow = ({ label, stars, status, color }: { label: string, stars: number, status: string, color: string }) => (
     <div className="flex items-center gap-2 mb-3">
-        <span className="w-20 text-base font-bold text-[#5D4037] text-right font-['Comic_Sans_MS','Chalkboard_SE','sans-serif']">{label}:</span>
+        <span className="w-24 text-base font-bold text-[#5D4037] text-right">{label}:</span>
 
         {/* Stars */}
         <div className="flex gap-0.5">
@@ -27,7 +27,7 @@ const PerformanceRow = ({ label, stars, status, color }: { label: string, stars:
                 className="absolute left-0 top-0 bottom-0 opacity-40"
                 style={{ width: '100%', backgroundColor: color }}
             ></div>
-            <span className="relative z-10 text-xs font-bold text-[#5D4037] truncate font-['Comic_Sans_MS','Chalkboard_SE','sans-serif']">{status}</span>
+            <span className="relative z-10 text-xs font-bold text-[#5D4037] truncate">{status}</span>
         </div>
     </div>
 );

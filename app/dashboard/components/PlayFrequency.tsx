@@ -32,7 +32,7 @@ export default function PlayFrequency() {
                                 className="object-fill" // Stretch to fill the height
                             />
                         </div>
-                        <span className="text-sm font-bold text-[#5D4037] font-['Comic_Sans_MS','Chalkboard_SE','sans-serif']">{item.day}</span>
+                        <span className="text-sm font-bold text-[#5D4037]">{item.day}</span>
                     </div>
                 ))}
             </div>
