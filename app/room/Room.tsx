@@ -519,7 +519,7 @@ export default function Room() {
         };
     }, []);
 
-    const [showBookshelf, setShowBookshelf] = useState(false);
+    const [showBookshelf, setShowBookshelf] = useState(true); // Show bookshelf by default
 
     return (
         <div className="relative w-full h-full">
@@ -546,16 +546,14 @@ export default function Room() {
                         }, 2000);
                     }} />
 
-                    {/* Bookshelf Model - Always mounted but hidden via visible prop */}
-                    <group position={[0.8, -0.2, 0]} scale={0.65} visible={showBookshelf}>
-                        <Center>
-                            <group position={[4.0, 0, 0]} rotation={[0, -0.3, 0]}>
-                                <Float speed={1} rotationIntensity={0.2} floatIntensity={0.2}>
-                                    <BookshelfModel />
-                                </Float>
-                            </group>
-                        </Center>
-                    </group>
+                    {/* Bookshelf Model */}
+                    {showBookshelf && (
+                        <group position={[2, 1, -2]} scale={0.5} rotation={[0, -0.3, 0]}>
+                            <Float speed={1} rotationIntensity={0.2} floatIntensity={0.2}>
+                                <BookshelfModel />
+                            </Float>
+                        </group>
+                    )}
                 </Canvas>
             </div>
         </div>
