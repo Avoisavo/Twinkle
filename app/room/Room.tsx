@@ -273,7 +273,7 @@ export default function Room() {
     useEffect(() => {
         if (!isHelloKittyLoaded) return;
 
-        const delaySeconds = 2;
+        const delaySeconds = 5;
         const timer = setTimeout(() => {
             setShowBookshelf(true);
         }, delaySeconds * 1000);

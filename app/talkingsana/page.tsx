@@ -64,7 +64,7 @@ export default function TalkingSanaPage() {
                     <Environment preset="city" />
 
                     <Suspense fallback={<Html center>Loading...</Html>}>
-                        <group position={[0, -1, 0]}>
+                        <group position={[0, -0.5, 0]}>
                             <ChatboxModel />
                             <ChatBubble />
                         </group>
