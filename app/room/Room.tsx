@@ -279,7 +279,15 @@ export default function Room() {
     return (
         <div className="relative w-full h-full">
             {/* Pixi Container */}
-            <div ref={containerRef} className="fixed inset-0 w-full h-full bg-white" />
+            <div
+                ref={containerRef}
+                className="fixed inset-0 w-full h-full bg-white"
+                style={{
+                    backgroundImage: 'url(/room/tiny_room.png)',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                }}
+            />
 
             {/* 3D Overlay */}
             <div className="fixed inset-0 pointer-events-none z-10">
