@@ -1,4 +1,7 @@
+"use client";
+
 import React, { useRef, useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { Canvas, useFrame, ThreeEvent } from '@react-three/fiber';
 import { EffectComposer, N8AO, Bloom } from '@react-three/postprocessing';
 import { RoundedBox, OrbitControls, Environment, Float, Center, ContactShadows, useTexture, Html } from '@react-three/drei';
@@ -87,6 +90,7 @@ const Book: React.FC<BookProps> = ({ position, rotation = [0, 0, 0], color, args
     const group = useRef<THREE.Group>(null);
     const [hovered, setHover] = useState(false);
     const [active, setActive] = useState(false);
+    const router = useRouter();
 
     const width = args[0];
     const height = args[1];
@@ -115,9 +119,15 @@ const Book: React.FC<BookProps> = ({ position, rotation = [0, 0, 0], color, args
             ref={group}
             position={position}
             rotation={rotation as any} // Cast to any or THREE.Euler compatible
-            onPointerOver={(e) => { e.stopPropagation(); setHover(true); }}
-            onPointerOut={(e) => { e.stopPropagation(); setHover(false); }}
-            onClick={(e) => { e.stopPropagation(); setActive(!active); }}
+            onPointerOver={(e) => { e.stopPropagation(); setHover(true); document.body.style.cursor = 'pointer'; }}
+            onPointerOut={(e) => { e.stopPropagation(); setHover(false); document.body.style.cursor = 'auto'; }}
+            onClick={(e) => {
+                e.stopPropagation();
+                setActive(!active);
+                if (hoverLabel === "Vocabulary Practice") {
+                    router.push('/learnword');
+                }
+            }}
         >
             {/* Pages (White block inside) */}
             <mesh position={[0, 0, -0.02]} castShadow receiveShadow>
