@@ -125,7 +125,7 @@ const Book: React.FC<BookProps> = ({ position, rotation = [0, 0, 0], color, args
             onClick={(e) => {
                 e.stopPropagation();
                 setActive(!active);
-                if (hoverLabel === "Dyslexia") {
+                if (hoverLabel === "Dyslexia Word Practice") {
                     router.push('/dyslexia');
                 } else if (hoverLabel === "Vocabulary Practice") {
                     router.push('/learnword');
@@ -596,7 +596,7 @@ const Bookshelf: React.FC<{ onNavigate?: (path: string) => void }> = ({ onNaviga
                                 rotation: [0, 0, -Math.PI / 2],
                                 args: [bookWidth, bookHeight, 0.8], // width is thickness, height is length
                                 color,
-                                hoverLabel: i === 2 ? "Dyslexia" : (i === 1 ? "Vocabulary Practice" : "Game Practice")
+                                hoverLabel: i === 2 ? "Dyslexia Word Practice" : (i === 1 ? "Vocabulary Practice" : "Game Practice")
                             });
                         }
                         currentX += bookHeight + 0.05;
@@ -616,7 +616,7 @@ const Bookshelf: React.FC<{ onNavigate?: (path: string) => void }> = ({ onNaviga
                             rotation: [0, 0, 0],
                             args: [bookWidth, actualBookHeight, 0.8],
                             color,
-                            hoverLabel: i === 2 ? "Dyslexia" : (i === 1 ? "Vocabulary Practice" : "Game Practice")
+                            hoverLabel: i === 2 ? "Dyslexia Word Practice" : (i === 1 ? "Vocabulary Practice" : "Game Practice")
                         });
                         currentX += bookWidth + 0.05;
                     }
