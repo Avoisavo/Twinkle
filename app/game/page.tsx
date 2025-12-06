@@ -184,11 +184,16 @@ import { Tree } from '@/components/garden/Tree';
 
 function BeachEnvironment() {
     const sandTexture = useTexture('/hellokitty/sand.png');
+    const grassTexture = useTexture('/gardenAssets/grasstexture.png');
 
     // Configure texture repeating
     sandTexture.wrapS = THREE.RepeatWrapping;
     sandTexture.wrapT = THREE.RepeatWrapping;
-    sandTexture.repeat.set(1, 100); // Adjust repeat based on length
+    sandTexture.repeat.set(1, 100);
+
+    grassTexture.wrapS = THREE.RepeatWrapping;
+    grassTexture.wrapT = THREE.RepeatWrapping;
+    grassTexture.repeat.set(20, 100);
 
     // Generate some random decorations along the track
     const decorations = useMemo(() => {
@@ -209,10 +214,10 @@ function BeachEnvironment() {
 
     return (
         <group>
-            {/* Sand Ground (Base) */}
+            {/* Grass Ground (Base) */}
             <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.2, -500]} receiveShadow>
                 <planeGeometry args={[200, 1000]} />
-                <meshStandardMaterial color="#4caf50" />
+                <meshStandardMaterial map={grassTexture} />
             </mesh>
 
             {/* Runway with Sand Texture */}
