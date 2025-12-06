@@ -81,17 +81,87 @@ function Player({
     );
 }
 
+function Rock({ position, scale = 1, visible = true }: { position: [number, number, number], scale?: number, visible?: boolean }) {
+    if (!visible) return null;
+    return (
+        <mesh position={position} scale={scale} castShadow receiveShadow>
+            <dodecahedronGeometry args={[1, 0]} />
+            <meshStandardMaterial color="#808080" roughness={0.9} />
+        </mesh>
+    );
+}
+
+function Explosion({ position, onComplete }: { position: [number, number, number], onComplete: () => void }) {
+    const particles = useMemo(() => {
+        return new Array(15).fill(0).map(() => ({
+            velocity: [
+                (Math.random() - 0.5) * 10,
+                (Math.random() - 0.5) * 10 + 5, // Upward bias
+                (Math.random() - 0.5) * 10
+            ] as [number, number, number],
+            scale: Math.random() * 0.3 + 0.1,
+            offset: [
+                (Math.random() - 0.5) * 0.5,
+                (Math.random() - 0.5) * 0.5,
+                (Math.random() - 0.5) * 0.5
+            ] as [number, number, number]
+        }));
+    }, []);
+
+    const group = useRef<THREE.Group>(null);
+    const [time, setTime] = useState(0);
+
+    useFrame((state, delta) => {
+        setTime(t => t + delta);
+        if (time > 1.5) {
+            onComplete();
+            return;
+        }
+
+        if (group.current) {
+            group.current.children.forEach((child, i) => {
+                const p = particles[i];
+                child.position.x += p.velocity[0] * delta;
+                child.position.y += p.velocity[1] * delta;
+                child.position.z += p.velocity[2] * delta;
+
+                // Gravity
+                p.velocity[1] -= 20 * delta;
+
+                // Rotation
+                child.rotation.x += delta * 2;
+                child.rotation.z += delta * 2;
+            });
+        }
+    });
+
+    return (
+        <group ref={group} position={position}>
+            {particles.map((p, i) => (
+                <mesh key={i} position={p.offset} scale={p.scale}>
+                    <dodecahedronGeometry args={[1, 0]} />
+                    <meshStandardMaterial color="#606060" />
+                </mesh>
+            ))}
+        </group>
+    );
+}
+
 function AnswerGate({
     position,
     text,
-    color = "#ff0000"
+    color = "#ff0000",
+    showRock = true
 }: {
     position: [number, number, number],
     text: string,
-    color?: string
+    color?: string,
+    showRock?: boolean
 }) {
     return (
         <group position={position}>
+            {/* Rock behind text */}
+            <Rock position={[0, 1, -1]} scale={1.5} visible={showRock} />
             {/* Gate Frame Removed */}
 
             {/* Answer Text */}
@@ -215,6 +285,8 @@ export default function GamePage() {
     const [playerZ, setPlayerZ] = useState(0);
     const [gameState, setGameState] = useState<'menu' | 'playing' | 'correct' | 'wrong'>('menu');
     const [gameId, setGameId] = useState(0); // Used to reset the scene
+    const [explosions, setExplosions] = useState<{ id: number, position: [number, number, number] }[]>([]);
+    const [explodedGates, setExplodedGates] = useState<Set<number>>(new Set()); // Track which gates have exploded
 
     // Quiz Configuration
     const quiz = {
@@ -234,6 +306,8 @@ export default function GamePage() {
         setGameId(prev => prev + 1);
         setLane(0);
         setPlayerZ(0);
+        setExplosions([]);
+        setExplodedGates(new Set());
         setGameState('playing'); // Restart immediately
     };
 
@@ -267,6 +341,15 @@ export default function GamePage() {
             if (chosenAnswer) {
                 if (chosenAnswer.isCorrect) {
                     setGameState('correct');
+                    // Trigger explosion if not already exploded
+                    const gateIndex = quiz.answers.indexOf(chosenAnswer);
+                    if (!explodedGates.has(gateIndex)) {
+                        setExplosions(prev => [...prev, {
+                            id: Date.now(),
+                            position: [chosenAnswer.lane * LANE_WIDTH, 0, quiz.zDistance]
+                        }]);
+                        setExplodedGates(prev => new Set(prev).add(gateIndex));
+                    }
                 } else {
                     setGameState('wrong');
                 }
@@ -358,6 +441,16 @@ export default function GamePage() {
                             position={[ans.lane * LANE_WIDTH, 0, quiz.zDistance]}
                             text={ans.text}
                             color={ans.isCorrect ? "#4ade80" : "#f87171"}
+                            showRock={!explodedGates.has(i)}
+                        />
+                    ))}
+
+                    {/* Render Explosions */}
+                    {explosions.map(expl => (
+                        <Explosion
+                            key={expl.id}
+                            position={expl.position}
+                            onComplete={() => setExplosions(prev => prev.filter(e => e.id !== expl.id))}
                         />
                     ))}
                 </group>
