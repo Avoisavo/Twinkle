@@ -115,8 +115,20 @@ export default function TalkingSanaPage() {
 
                     <Suspense fallback={<Html center>Loading...</Html>}>
                         <group position={[0, -0.5, 0]}>
-                            <ChatboxModel />
-                            <ChatBubble />
+                            {sceneStep === 0 ? <ChatboxModel /> : <FightModel />}
+                            <ChatBubble
+                                text={
+                                    sceneStep === 0 ? (
+                                        <>
+                                            HI lets talk!!
+                                            <br />
+                                            What you want to know today
+                                        </>
+                                    ) : (
+                                        "Should I defend myself or join your dojo?\nHi-yaaa!"
+                                    )
+                                }
+                            />
                         </group>
                     </Suspense>
 
