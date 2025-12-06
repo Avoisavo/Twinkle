@@ -5,11 +5,10 @@ import { Center, Float } from "@react-three/drei";
 import * as THREE from "three";
 import { useRouter } from "next/navigation";
 import HelloKitty3D from "../../components/room/HelloKitty3D";
-import { BookshelfModel, BookshelfEnvironment } from "../../components/BookshelfScene";
+import { BookshelfModel, BookshelfEnvironment } from "@/components/BookshelfScene";
 import GameLoader from "../../components/GameLoader";
 
 // Animated wrapper for the bookshelf
-const BookshelfAnimatedGroup = () => {
 const BookshelfAnimatedGroup = ({ visible, onNavigate }: { visible: boolean, onNavigate: (path: string) => void }) => {
     const group = useRef<THREE.Group>(null);
     const targetScale = 0.8;
@@ -330,7 +329,7 @@ export default function Room() {
                     <HelloKitty3D onLoad={() => setIsHelloKittyLoaded(true)} />
 
                     {/* Bookshelf Model */}
-                    {showBookshelf && <BookshelfAnimatedGroup />}
+
                     {/* Bookshelf Model - Always rendered, visibility controlled by prop */}
                     <BookshelfAnimatedGroup visible={showBookshelf} onNavigate={handleNavigate} />
                 </Canvas>
