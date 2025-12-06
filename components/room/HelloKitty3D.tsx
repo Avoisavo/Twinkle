@@ -8,11 +8,14 @@ interface HelloKitty3DProps {
     onLoad?: () => void;
 }
 
-export default function HelloKitty3D({ onHelloComplete, onLoad }: HelloKitty3DProps = {}) {
+import { Selection, Select, EffectComposer, Outline } from "@react-three/postprocessing";
+
+export default function HelloKitty3D({ onHelloComplete, onLoad, onClick }: HelloKitty3DProps & { onClick?: () => void }) {
     const group = useRef<any>(null);
     const waveFbx = useFBX("/hellokitty/helloModel/chatboxwave.fbx");
     const idleFbx = useFBX("/hellokitty/helloModel/dwarf Idle.fbx");
     const { viewport } = useThree();
+    const [hovered, setHovered] = useState(false);
 
     // Trigger onLoad when component mounts (meaning FBX is loaded)
     useEffect(() => {
@@ -155,45 +158,81 @@ export default function HelloKitty3D({ onHelloComplete, onLoad }: HelloKitty3DPr
         group.current.rotation.y = currentState.current.rotateY;
     });
 
-    return (
-        <group ref={group}>
-            <primitive object={waveFbx} />
-            {/* Add a light specifically for the model if needed */}
-            <ambientLight intensity={0.5} />
-            <directionalLight position={[5, 5, 5]} intensity={1.5} />
+    useEffect(() => {
+        document.body.style.cursor = hovered ? 'pointer' : 'auto';
+        return () => { document.body.style.cursor = 'auto'; };
+    }, [hovered]);
 
-            {/* Chat Bubble - Only visible in center */}
-            {currentVariant === "center" && (
-                <Html position={[0, 180, 0]} center>
-                    <div style={{
-                        background: 'white',
-                        padding: '16px 24px', // Increased padding
-                        borderRadius: '20px', // Increased radius
-                        borderBottomLeftRadius: '0',
-                        boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                        fontFamily: 'sans-serif',
-                        fontSize: '24px', // Increased font size
-                        fontWeight: 'bold',
-                        color: '#333',
-                        whiteSpace: 'nowrap',
-                        position: 'relative',
-                        marginBottom: '20px'
-                    }}>
-                        Hello my friend !
-                        <div style={{
-                            position: 'absolute',
-                            left: '0',
-                            bottom: '-10px',
-                            width: '0',
-                            height: '0',
-                            borderLeft: '10px solid white',
-                            borderBottom: '10px solid transparent',
-                            borderTop: '0'
-                        }} />
-                    </div>
-                </Html>
-            )}
-        </group>
+    return (
+        <Selection>
+            <EffectComposer autoClear={false} enabled={hovered}>
+                <Outline visibleEdgeColor={0xFFFF00} hiddenEdgeColor={0xFFFF00} blur edgeStrength={10} width={1000} />
+            </EffectComposer>
+            <Select enabled={hovered}>
+                <group
+                    ref={group}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onClick?.();
+                    }}
+                    onPointerOver={(e) => {
+                        e.stopPropagation();
+                        setHovered(true);
+                    }}
+                    onPointerOut={(e) => {
+                        e.stopPropagation();
+                        setHovered(false);
+                    }}
+                >
+                    <primitive object={waveFbx} />
+
+                    {/* Backlight Effect */}
+                    <pointLight
+                        position={[0, 2, -2]}
+                        intensity={hovered ? 5 : 0}
+                        color="yellow"
+                        distance={10}
+                        decay={2}
+                    />
+
+                    {/* Add a light specifically for the model if needed */}
+                    <ambientLight intensity={0.5} />
+                    <directionalLight position={[5, 5, 5]} intensity={1.5} />
+
+                    {/* Chat Bubble - Only visible in center */}
+                    {currentVariant === "center" && (
+                        <Html position={[0, 180, 0]} center>
+                            <div style={{
+                                background: 'white',
+                                padding: '16px 24px', // Increased padding
+                                borderRadius: '20px', // Increased radius
+                                borderBottomLeftRadius: '0',
+                                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                                fontFamily: 'sans-serif',
+                                fontSize: '24px', // Increased font size
+                                fontWeight: 'bold',
+                                color: '#333',
+                                whiteSpace: 'nowrap',
+                                position: 'relative',
+                                marginBottom: '20px'
+                            }}>
+                                Hello my friend !
+                                <div style={{
+                                    position: 'absolute',
+                                    left: '0',
+                                    bottom: '-10px',
+                                    width: '0',
+                                    height: '0',
+                                    borderLeft: '10px solid white',
+                                    borderBottom: '10px solid transparent',
+                                    borderTop: '0'
+                                }} />
+                            </div>
+                        </Html>
+                    )}
+                </group>
+            </Select>
+        </Selection>
     );
 }
 
