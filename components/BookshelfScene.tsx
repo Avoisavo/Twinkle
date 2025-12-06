@@ -802,3 +802,4 @@ const BookshelfScene: React.FC = () => {
 };
 
 export default BookshelfScene;
+useTexture.preload('/wood_color.png');
