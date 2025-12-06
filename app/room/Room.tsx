@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import * as PIXI from "pixi.js";
 import { Canvas } from "@react-three/fiber";
 import { Center, Float } from "@react-three/drei";
-import HelloKitty3D from "../../components/room/HelloKitty3D";
-import { BookshelfModel, BookshelfEnvironment } from "../../components/BookshelfScene";
+import HelloKitty3D from "@/components/room/HelloKitty3D";
+import { BookshelfModel, BookshelfEnvironment } from "@/components/BookshelfScene";
 
 export default function Room() {
     const containerRef = useRef<HTMLDivElement>(null);

@@ -6,7 +6,11 @@ import * as THREE from "three";
 
 const MotionGroup = motion.group as any;
 
-export default function HelloKitty3D() {
+interface HelloKitty3DProps {
+    onHelloComplete?: () => void;
+}
+
+export default function HelloKitty3D({ onHelloComplete }: HelloKitty3DProps) {
     const group = useRef<any>(null);
     const waveFbx = useFBX("/hellokitty/helloModel/chatboxwave.fbx");
     const idleFbx = useFBX("/hellokitty/helloModel/dwarf Idle.fbx");
@@ -52,6 +56,10 @@ export default function HelloKitty3D() {
 
                 // Trigger move to corner
                 setCurrentVariant("corner");
+
+                if (onHelloComplete) {
+                    onHelloComplete();
+                }
             }
         };
 
@@ -60,7 +68,7 @@ export default function HelloKitty3D() {
         return () => {
             mixer.removeEventListener("finished", onFinished);
         };
-    }, [actions, mixer]);
+    }, [actions, mixer, onHelloComplete]);
 
     // Animation variants
     const variants = {
