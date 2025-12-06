@@ -160,13 +160,13 @@ function AnswerGate({
 }) {
     return (
         <group position={position}>
-            {/* Rock behind text */}
-            <Rock position={[0, 1, -1]} scale={1.5} visible={showRock} />
+            {/* Rock behind text - Moved further back */}
+            <Rock position={[0, 1, -1.5]} scale={1.5} visible={showRock} />
             {/* Gate Frame Removed */}
 
-            {/* Answer Text */}
+            {/* Answer Text - Moved slightly forward */}
             <Text
-                position={[0, 2, 0]}
+                position={[0, 2, 0.5]}
                 fontSize={1}
                 color="white"
                 anchorX="center"
@@ -288,15 +288,29 @@ export default function GamePage() {
     const [explosions, setExplosions] = useState<{ id: number, position: [number, number, number] }[]>([]);
     const [explodedGates, setExplodedGates] = useState<Set<number>>(new Set()); // Track which gates have exploded
 
+    const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
+
     // Quiz Configuration
-    const quiz = {
-        question: "Which is the correct spelling of jump?",
-        answers: [
-            { text: "gump", lane: -1, isCorrect: false }, // Left
-            { text: "jump", lane: 1, isCorrect: true },   // Right
-        ],
-        zDistance: -50 // Distance where the gates are located
-    };
+    const quizzes = useMemo(() => [
+        {
+            question: "Which is the correct spelling of jump?",
+            answers: [
+                { text: "gump", lane: -1, isCorrect: false }, // Left
+                { text: "jump", lane: 1, isCorrect: true },   // Right
+            ],
+            zDistance: -50
+        },
+        {
+            question: "Which is the correct spelling of happy?",
+            answers: [
+                { text: "happy", lane: -1, isCorrect: true }, // Left
+                { text: "gappy", lane: 1, isCorrect: false }, // Right
+            ],
+            zDistance: -100
+        }
+    ], []);
+
+    const currentQuiz = quizzes[currentQuizIndex] || quizzes[quizzes.length - 1];
 
     const startGame = () => {
         setGameState('playing');
@@ -304,8 +318,10 @@ export default function GamePage() {
 
     const resetGame = () => {
         setGameId(prev => prev + 1);
+
         setLane(0);
         setPlayerZ(0);
+        setCurrentQuizIndex(0);
         setExplosions([]);
         setExplodedGates(new Set());
         setGameState('playing'); // Restart immediately
@@ -334,27 +350,49 @@ export default function GamePage() {
         // Check if player has passed the gate
         // Player moves in negative Z. Gate is at quiz.zDistance (e.g., -50).
         // When playerZ <= -50, they have passed/hit the gate.
-        if (playerZ <= quiz.zDistance + 1) { // +1 buffer
+        // Check if player has passed the current gate
+        const activeQuiz = quizzes[currentQuizIndex];
+        if (!activeQuiz) return;
+
+        if (playerZ <= activeQuiz.zDistance + 1) { // +1 buffer
             // Determine which answer was chosen
-            const chosenAnswer = quiz.answers.find(a => a.lane === lane);
+            const chosenAnswer = activeQuiz.answers.find(a => a.lane === lane);
 
             if (chosenAnswer) {
                 if (chosenAnswer.isCorrect) {
-                    setGameState('correct');
                     // Trigger explosion if not already exploded
-                    const gateIndex = quiz.answers.indexOf(chosenAnswer);
-                    if (!explodedGates.has(gateIndex)) {
+                    const gateId = currentQuizIndex * 10 + activeQuiz.answers.indexOf(chosenAnswer);
+
+                    if (!explodedGates.has(gateId)) {
                         setExplosions(prev => [...prev, {
                             id: Date.now(),
-                            position: [chosenAnswer.lane * LANE_WIDTH, 0, quiz.zDistance]
+                            position: [chosenAnswer.lane * LANE_WIDTH, 0, activeQuiz.zDistance]
                         }]);
-                        setExplodedGates(prev => new Set(prev).add(gateIndex));
+                        setExplodedGates(prev => new Set(prev).add(gateId));
+
+                        // Move to next quiz if available, otherwise win or loop? 
+                        // For now, let's just show "Correct" briefly or keep running?
+                        // The original logic showed a "Correct" screen which stopped the game.
+                        // If we want multiple questions, we shouldn't stop on the first one.
+
+                        if (currentQuizIndex < quizzes.length - 1) {
+                            // Advance to next question
+                            setCurrentQuizIndex(prev => prev + 1);
+                            // Don't show game over screen, just continue
+                        } else {
+                            // Final question answered correctly
+                            setGameState('correct');
+                        }
                     }
                 } else {
                     setGameState('wrong');
                 }
             } else {
-                // Middle lane or empty lane
+                // Middle lane or empty lane - if they pass the gate without hitting an answer?
+                // The original logic assumed they MUST hit something or it's wrong?
+                // If they are in the middle (lane 0) and there is no answer there, they just run past?
+                // But the gates are usually blocking.
+                // Let's assume they must pick a side.
                 setGameState('wrong');
             }
         }
@@ -368,7 +406,7 @@ export default function GamePage() {
                 {/* Quiz Header - Always Visible */}
                 <div className="absolute top-8 bg-white/90 backdrop-blur px-8 py-4 rounded-2xl shadow-xl transform transition-transform duration-500 hover:scale-105">
                     <h1 className="text-4xl font-bold text-slate-800 text-center">H Quiz</h1>
-                    <p className="text-6xl font-black text-indigo-600 mt-2 text-center">{quiz.question}</p>
+                    <p className="text-6xl font-black text-indigo-600 mt-2 text-center">{currentQuiz.question}</p>
                 </div>
 
                 {/* Menu / Start Screen */}
@@ -397,6 +435,7 @@ export default function GamePage() {
                             onClick={() => {
                                 setPlayerZ(0);
                                 setLane(0);
+                                setCurrentQuizIndex(0);
                                 setGameState('playing');
                             }}
                             className="bg-indigo-600 hover:bg-indigo-700 text-white text-xl font-bold py-3 px-8 rounded-full shadow-lg transition-all hover:scale-105"
@@ -409,9 +448,11 @@ export default function GamePage() {
 
             {/* Screens */}
             {gameState === 'menu' && <StartScreen onStart={startGame} />}
-            {(gameState === 'correct' || gameState === 'wrong') && (
-                <GameOverScreen result={gameState} onRestart={resetGame} />
-            )}
+            {
+                (gameState === 'correct' || gameState === 'wrong') && (
+                    <GameOverScreen result={gameState} onRestart={resetGame} />
+                )
+            }
 
             {/* Controls Hint */}
             <div className="absolute bottom-8 left-0 w-full text-center z-10 pointer-events-none transition-opacity duration-300" style={{ opacity: gameState === 'playing' ? 1 : 0 }}>
@@ -434,15 +475,19 @@ export default function GamePage() {
                     <Player lane={lane} setZPosition={setPlayerZ} active={gameState === 'playing'} />
                     <BeachEnvironment />
 
-                    {/* Render Answer Gates */}
-                    {quiz.answers.map((ans, i) => (
-                        <AnswerGate
-                            key={i}
-                            position={[ans.lane * LANE_WIDTH, 0, quiz.zDistance]}
-                            text={ans.text}
-                            color={ans.isCorrect ? "#4ade80" : "#f87171"}
-                            showRock={!explodedGates.has(i)}
-                        />
+                    {/* Render Answer Gates for ALL quizzes */}
+                    {quizzes.map((q, qIndex) => (
+                        <group key={qIndex}>
+                            {q.answers.map((ans, aIndex) => (
+                                <AnswerGate
+                                    key={`${qIndex}-${aIndex}`}
+                                    position={[ans.lane * LANE_WIDTH, 0, q.zDistance]}
+                                    text={ans.text}
+                                    color={ans.isCorrect ? "#4ade80" : "#f87171"}
+                                    showRock={!explodedGates.has(qIndex * 10 + aIndex)}
+                                />
+                            ))}
+                        </group>
                     ))}
 
                     {/* Render Explosions */}
@@ -457,7 +502,7 @@ export default function GamePage() {
 
                 <fog attach="fog" args={['#87CEEB', 20, 100]} />
             </Canvas>
-        </div>
+        </div >
     );
 }
 
