@@ -6,9 +6,10 @@ import * as PIXI from "pixi.js";
 interface GameLoaderProps {
     onFinished: () => void;
     slideUpOnFinish?: boolean;
+    loadingText?: string;
 }
 
-const GameLoader: React.FC<GameLoaderProps> = ({ onFinished, slideUpOnFinish = true }) => {
+const GameLoader: React.FC<GameLoaderProps> = ({ onFinished, slideUpOnFinish = true, loadingText = "Generating the room......" }) => {
     const [progress, setProgress] = useState(0);
     const [isComplete, setIsComplete] = useState(false);
     // Simple state to ensure we don't start progress until video is at least ready to play
@@ -96,6 +97,9 @@ const GameLoader: React.FC<GameLoaderProps> = ({ onFinished, slideUpOnFinish = t
                         className={styles.loaderBar}
                         style={{ width: `${progress}%` }}
                     />
+                </div>
+                <div className={styles.loadingText}>
+                    {loadingText}
                 </div>
             </div>
         </div>

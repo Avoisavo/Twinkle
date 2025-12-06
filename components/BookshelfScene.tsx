@@ -24,6 +24,7 @@ interface BookProps {
     color: string;
     args?: [number, number, number];
     hoverLabel?: string;
+    onNavigate?: (path: string) => void;
 }
 
 interface TextureMaterialProps {
@@ -86,7 +87,7 @@ interface ShelfItem {
 
 // --- Components ---
 
-const Book: React.FC<BookProps> = ({ position, rotation = [0, 0, 0], color, args = [0.2, 1, 0.8], hoverLabel }) => {
+const Book: React.FC<BookProps> = ({ position, rotation = [0, 0, 0], color, args = [0.2, 1, 0.8], hoverLabel, onNavigate }) => {
     const group = useRef<THREE.Group>(null);
     const [hovered, setHover] = useState(false);
     const [active, setActive] = useState(false);
@@ -125,9 +126,17 @@ const Book: React.FC<BookProps> = ({ position, rotation = [0, 0, 0], color, args
                 e.stopPropagation();
                 setActive(!active);
                 if (hoverLabel === "Vocabulary Practice") {
-                    router.push('/learnword');
+                    if (onNavigate) {
+                        onNavigate('/learnword');
+                    } else {
+                        router.push('/learnword');
+                    }
                 } else if (hoverLabel === "Game Practice") {
-                    router.push('/game');
+                    if (onNavigate) {
+                        onNavigate('/game');
+                    } else {
+                        router.push('/game');
+                    }
                 }
             }}
         >
@@ -525,7 +534,7 @@ const CartoonEye: React.FC<CartoonEyeProps> = ({ position, rotation, side = 'lef
     );
 };
 
-const Bookshelf: React.FC = () => {
+const Bookshelf: React.FC<{ onNavigate?: (path: string) => void }> = ({ onNavigate }) => {
     // Shelf dimensions
     const width = 3.5;
     const height = 3.5;
@@ -743,7 +752,7 @@ const Bookshelf: React.FC = () => {
                 <group key={i}>
                     {shelfItems.map((item, j) => (
                         item.type === 'book' ? (
-                            <Book key={j} position={item.position} rotation={item.rotation} args={item.args} color={item.color} hoverLabel={item.hoverLabel} />
+                            <Book key={j} position={item.position} rotation={item.rotation} args={item.args} color={item.color} hoverLabel={item.hoverLabel} onNavigate={onNavigate} />
                         ) : (
                             <Decoration key={j} position={item.position} color={item.color} type={item.decorationType} />
                         )
@@ -758,6 +767,7 @@ const Bookshelf: React.FC = () => {
 interface BookshelfSceneContentProps {
     showControls?: boolean;
     showShadows?: boolean;
+    onNavigate?: (path: string) => void;
 }
 
 export const BookshelfModel = Bookshelf;
@@ -781,7 +791,8 @@ export const BookshelfEnvironment: React.FC<{ showShadows?: boolean }> = ({ show
 
 export const BookshelfSceneContent: React.FC<BookshelfSceneContentProps> = ({
     showControls = false,
-    showShadows = true
+    showShadows = true,
+    onNavigate
 }) => {
     return (
         <>
@@ -790,7 +801,7 @@ export const BookshelfSceneContent: React.FC<BookshelfSceneContentProps> = ({
             <Center>
                 <group position={[4.0, 2.0, 0]} rotation={[0, -0.3, 0]}>
                     <Float speed={1} rotationIntensity={0.2} floatIntensity={0.2}>
-                        <Bookshelf />
+                        <Bookshelf onNavigate={onNavigate} />
                     </Float>
                 </group>
             </Center>

@@ -45,7 +45,7 @@ const Home: React.FC = () => {
         {/* Game Loader Overlay */}
         {showGameLoader && (
           <div className="absolute inset-0 z-[200]">
-            <GameLoader onFinished={handleGameLoaderFinished} slideUpOnFinish={false} />
+            <GameLoader onFinished={handleGameLoaderFinished} slideUpOnFinish={false} loadingText="Generating the room......" />
           </div>
         )}
 

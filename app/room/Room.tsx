@@ -3,11 +3,13 @@ import * as PIXI from "pixi.js";
 import { Canvas, useFrame, RootState } from "@react-three/fiber";
 import { Center, Float } from "@react-three/drei";
 import * as THREE from "three";
+import { useRouter } from "next/navigation";
 import HelloKitty3D from "../../components/room/HelloKitty3D";
 import { BookshelfModel, BookshelfEnvironment } from "../../components/BookshelfScene";
+import GameLoader from "../../components/GameLoader";
 
 // Animated wrapper for the bookshelf
-const BookshelfAnimatedGroup = ({ visible }: { visible: boolean }) => {
+const BookshelfAnimatedGroup = ({ visible, onNavigate }: { visible: boolean, onNavigate: (path: string) => void }) => {
     const group = useRef<THREE.Group>(null);
     const targetScale = 0.8;
 
@@ -28,7 +30,7 @@ const BookshelfAnimatedGroup = ({ visible }: { visible: boolean }) => {
     return (
         <group ref={group} position={[1.5, 0.2, -2]} scale={0} rotation={[0, -0.3, 0]}>
             <Float speed={1} rotationIntensity={0.2} floatIntensity={0.2}>
-                <BookshelfModel />
+                <BookshelfModel onNavigate={onNavigate} />
             </Float>
         </group>
     );
@@ -36,6 +38,10 @@ const BookshelfAnimatedGroup = ({ visible }: { visible: boolean }) => {
 
 export default function Room() {
     const containerRef = useRef<HTMLDivElement>(null);
+    const router = useRouter();
+    const [showGameLoader, setShowGameLoader] = useState(false);
+    const [loadingText, setLoadingText] = useState("Loading...");
+    const [targetPath, setTargetPath] = useState<string | null>(null);
 
     useEffect(() => {
         // ... (existing Pixi logic - unchanged)
@@ -276,6 +282,24 @@ export default function Room() {
         return () => clearTimeout(timer);
     }, [isHelloKittyLoaded]);
 
+    const handleNavigate = (path: string) => {
+        setTargetPath(path);
+        if (path === '/learnword') {
+            setLoadingText("Opening the book......");
+        } else if (path === '/game') {
+            setLoadingText("Creating the scene......");
+        } else {
+            setLoadingText("Loading......");
+        }
+        setShowGameLoader(true);
+    };
+
+    const handleGameLoaderFinished = () => {
+        if (targetPath) {
+            router.push(targetPath);
+        }
+    };
+
     return (
         <div className="relative w-full h-full">
             {/* Pixi Container */}
@@ -306,9 +330,16 @@ export default function Room() {
                     <HelloKitty3D onLoad={() => setIsHelloKittyLoaded(true)} />
 
                     {/* Bookshelf Model - Always rendered, visibility controlled by prop */}
-                    <BookshelfAnimatedGroup visible={showBookshelf} />
+                    <BookshelfAnimatedGroup visible={showBookshelf} onNavigate={handleNavigate} />
                 </Canvas>
             </div>
+
+            {/* Game Loader Overlay */}
+            {showGameLoader && (
+                <div className="absolute inset-0 z-[200] pointer-events-auto">
+                    <GameLoader onFinished={handleGameLoaderFinished} slideUpOnFinish={false} loadingText={loadingText} />
+                </div>
+            )}
         </div>
     );
 }
