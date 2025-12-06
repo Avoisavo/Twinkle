@@ -53,10 +53,6 @@ export default function HelloKitty3D({ onHelloComplete, onLoad }: HelloKitty3DPr
         rotateY: 0,
     });
 
-    const [message, setMessage] = useState("Hello my friend !");
-    const [showBubble, setShowBubble] = useState(true);
-    const [bubblePosition, setBubblePosition] = useState<[number, number, number]>([0, 180, 0]);
-
     useEffect(() => {
         if (!actions || !actions["Wave"] || !actions["Idle"]) {
             console.warn("HelloKitty3D: Missing required actions (Wave or Idle)");
@@ -82,10 +78,6 @@ export default function HelloKitty3D({ onHelloComplete, onLoad }: HelloKitty3DPr
 
                 // Trigger move to corner
                 setCurrentVariant("corner");
-
-                // Update message and position
-                setMessage("Please choose your material from the shelf");
-                setBubblePosition([0, 180, 0]); // Adjusted position (higher than 150)
 
                 // Call the completion callback if provided
                 if (onHelloComplete) {
@@ -123,39 +115,35 @@ export default function HelloKitty3D({ onHelloComplete, onLoad }: HelloKitty3DPr
     }, [currentVariant, viewport.width, viewport.height]);
 
     // Animate towards target state
-    useFrame((state, delta) => {
+    useFrame(() => {
         if (!group.current) return;
 
-        // Use a damping factor that is frame-rate independent
-        // damp formula: lerp(current, target, 1 - exp(-lambda * dt))
-        // lambda = 2 gives a nice smooth transition over ~1-2 seconds
-        const lambda = 1.5;
-        const alpha = 1 - Math.exp(-lambda * delta);
+        const lerpSpeed = 0.05; // Adjust for animation speed
 
         currentState.current.scale = THREE.MathUtils.lerp(
             currentState.current.scale,
             targetState.current.scale,
-            alpha
+            lerpSpeed
         );
         currentState.current.x = THREE.MathUtils.lerp(
             currentState.current.x,
             targetState.current.x,
-            alpha
+            lerpSpeed
         );
         currentState.current.y = THREE.MathUtils.lerp(
             currentState.current.y,
             targetState.current.y,
-            alpha
+            lerpSpeed
         );
         currentState.current.z = THREE.MathUtils.lerp(
             currentState.current.z,
             targetState.current.z,
-            alpha
+            lerpSpeed
         );
         currentState.current.rotateY = THREE.MathUtils.lerp(
             currentState.current.rotateY,
             targetState.current.rotateY,
-            alpha
+            lerpSpeed
         );
 
         group.current.scale.setScalar(currentState.current.scale);
@@ -174,27 +162,24 @@ export default function HelloKitty3D({ onHelloComplete, onLoad }: HelloKitty3DPr
             <ambientLight intensity={0.5} />
             <directionalLight position={[5, 5, 5]} intensity={1.5} />
 
-            {/* Chat Bubble */}
-            {showBubble && (
-                <Html position={bubblePosition} center>
+            {/* Chat Bubble - Only visible in center */}
+            {currentVariant === "center" && (
+                <Html position={[0, 180, 0]} center>
                     <div style={{
                         background: 'white',
-                        padding: '12px 20px', // Reduced padding
-                        borderRadius: '20px',
+                        padding: '16px 24px', // Increased padding
+                        borderRadius: '20px', // Increased radius
                         borderBottomLeftRadius: '0',
                         boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
                         fontFamily: 'sans-serif',
-                        fontSize: '18px', // Reduced font size
+                        fontSize: '24px', // Increased font size
                         fontWeight: 'bold',
                         color: '#333',
                         whiteSpace: 'nowrap',
                         position: 'relative',
-                        marginBottom: '20px',
-                        transition: 'all 0.5s ease-in-out', // Smooth transition for any style changes
-                        opacity: 1,
-                        transform: 'scale(1)',
+                        marginBottom: '20px'
                     }}>
-                        {message}
+                        Hello my friend !
                         <div style={{
                             position: 'absolute',
                             left: '0',

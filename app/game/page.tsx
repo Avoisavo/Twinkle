@@ -183,6 +183,11 @@ function AnswerGate({
     );
 }
 
+function Mushroom({ position }: { position: [number, number, number] }) {
+    const fbx = useFBX('/gardenAssets/mushroom.fbx');
+    return <primitive object={fbx.clone()} position={position} scale={0.05} />;
+}
+
 import { Tree } from '@/components/garden/Tree';
 
 function BeachEnvironment() {
@@ -210,6 +215,14 @@ function BeachEnvironment() {
             // Right side trees
             if (Math.random() > 0.3) {
                 items.push(<Tree key={`r-${z}`} position={[5 + Math.random() * 5, 0, z]} />);
+            }
+
+            // Mushrooms
+            if (Math.random() > 0.7) {
+                items.push(<Mushroom key={`m-l-${z}`} position={[-4 - Math.random() * 3, 0, z]} />);
+            }
+            if (Math.random() > 0.7) {
+                items.push(<Mushroom key={`m-r-${z}`} position={[4 + Math.random() * 3, 0, z]} />);
             }
         }
         return items;
@@ -371,18 +384,18 @@ export default function GamePage() {
     // Quiz Configuration
     const quizzes = useMemo(() => [
         {
-            question: "Which is the correct spelling of jump?",
+            question: "1 + 2 = ?",
             answers: [
-                { text: "gump", lane: -1, isCorrect: false }, // Left
-                { text: "jump", lane: 1, isCorrect: true },   // Right
+                { text: "4", lane: -1, isCorrect: false }, // Left
+                { text: "3", lane: 1, isCorrect: true },   // Right
             ],
             zDistance: -50
         },
         {
-            question: "Which is the correct spelling of happy?",
+            question: "3 + 1 = ?",
             answers: [
-                { text: "happy", lane: -1, isCorrect: true }, // Left
-                { text: "gappy", lane: 1, isCorrect: false }, // Right
+                { text: "4", lane: -1, isCorrect: true }, // Left
+                { text: "5", lane: 1, isCorrect: false }, // Right
             ],
             zDistance: -100
         }
@@ -483,7 +496,7 @@ export default function GamePage() {
 
                 {/* Quiz Header - Always Visible */}
                 <div className="absolute top-8 bg-white/90 backdrop-blur px-8 py-4 rounded-2xl shadow-xl transform transition-transform duration-500 hover:scale-105">
-                    <h1 className="text-4xl font-bold text-slate-800 text-center">H Quiz</h1>
+                    <h1 className="text-4xl font-bold text-slate-800 text-center">Quiz</h1>
                     <p className="text-6xl font-black text-indigo-600 mt-2 text-center">{currentQuiz.question}</p>
                 </div>
 
@@ -583,4 +596,3 @@ export default function GamePage() {
         </div >
     );
 }
-
